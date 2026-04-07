@@ -1,0 +1,18 @@
+N=50 budget study
+n_seeds: 500
+jobs: 8
+cases: [('CaseA_50_50', 25), ('CaseB_80_20', 40)]
+variants: [('NoQ_1_1', False, 1, 1), ('Q_only_1_1', True, 1, 1), ('Gossip_only_4_4', False, 4, 4), ('Gossip_only_8_8', False, 8, 8), ('Gossip_only_12_12', False, 12, 12), ('Gossip_only_16_16', False, 16, 16), ('Both_1_4', True, 1, 4), ('Both_1_8', True, 1, 8), ('Both_1_12', True, 1, 12), ('Both_1_16', True, 1, 16)]
+n_nodes: 50
+block_interval_s: 30.0
+sim_time_s: 3600.0
+epoch_len_blocks: 30
+cp_epoch_mode: height
+cp_tiebreak: none
+L_score_window: 40
+K_converge: 30
+net_delay_mean: 0.8
+net_delay_jitter: 0.2
+net_drop_p: 0.02
+block_bytes_est: 250
+wall_clock_s: 1248.745
