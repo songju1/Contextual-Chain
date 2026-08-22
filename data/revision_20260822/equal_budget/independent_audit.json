@@ -1,0 +1,9 @@
+{
+  "part_dirs": 50,
+  "raw_rows": 8000,
+  "schedule_rows": 2000,
+  "validation_rows": 2000,
+  "step7_adaptive_rows_crosschecked": 4000,
+  "step7_adaptive_mismatches": 0,
+  "errors": []
+}

@@ -1,0 +1,24 @@
+root=factorial_3x3_main_step7
+rows=20000 factorial=18000 references=2000 schedules=2000 validations=2000
+cell_counts:
+  CaseA_50_50 BranchScoreOnly__Adaptive: 1000
+  CaseA_50_50 BranchScoreOnly__FixedHigh: 1000
+  CaseA_50_50 BranchScoreOnly__FixedLow: 1000
+  CaseA_50_50 Full__Adaptive: 1000
+  CaseA_50_50 Full__FixedHigh: 1000
+  CaseA_50_50 Full__FixedLow: 1000
+  CaseA_50_50 HeightOnly__Adaptive: 1000
+  CaseA_50_50 HeightOnly__FixedHigh: 1000
+  CaseA_50_50 HeightOnly__FixedLow: 1000
+  CaseB_80_20 BranchScoreOnly__Adaptive: 1000
+  CaseB_80_20 BranchScoreOnly__FixedHigh: 1000
+  CaseB_80_20 BranchScoreOnly__FixedLow: 1000
+  CaseB_80_20 Full__Adaptive: 1000
+  CaseB_80_20 Full__FixedHigh: 1000
+  CaseB_80_20 Full__FixedLow: 1000
+  CaseB_80_20 HeightOnly__Adaptive: 1000
+  CaseB_80_20 HeightOnly__FixedHigh: 1000
+  CaseB_80_20 HeightOnly__FixedLow: 1000
+Full_vs_BranchScoreOnly_mismatches=0
+adaptive_hash_bad=0 adaptive_budget_bad=0
+AUDIT_PASS

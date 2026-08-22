@@ -1,0 +1,403 @@
+\documentclass[11pt]{article}
+
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{microtype}
+
+\title{Contextual Chain: General Design Specification and Reference Profile\\
+\large Version 2.0}
+\author{Song-Ju Kim}
+\date{August 22, 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This document specifies \emph{Contextual Chain} as a general design framework in which
+a participant maintains an evolving context and uses that context to guide subsequent
+operational decisions. The term \emph{chain} refers to continuity between successive context
+states; it does not require a blockchain, a particular ledger format, a fixed fork-choice rule, a
+specific synchronization controller, or a cryptographic construction. Version 2.0 separates
+the stable conceptual core from implementation-specific mechanisms. A recovery-oriented
+event-driven ledger simulator is retained as a non-normative reference profile because it
+provides the first concrete systems realization and reproducible evaluation environment.
+Checkpointing, scoring, inconsistency estimation, synchronization adaptation, pruning, peer
+selection, and cryptographic context binding are treated as replaceable modules rather than
+defining features of Contextual Chain. The broader resource-asymmetry hypothesis---that a
+participant following a shared context may track a narrow valid trajectory while a context-
+uncertain observer may need to consider multiple plausible trajectories---remains a motivating
+research direction, not a theorem or security claim of this specification.
+\end{abstract}
+
+\tableofcontents
+
+\section{Status and Scope}
+This document is Version 2.0 of the Contextual Chain design specification. The Version 1.0
+record dated April 6, 2026 remains a historical description of the first operational realization.
+Version 2.0 generalizes that formulation so that the design is not tied to one simulator, one
+head-selection formula, one network model, or one resource-allocation policy.
+
+Contextual Chain is a design family. An implementation conforms to the conceptual core
+when it explicitly maintains an evolving operational context and uses that context in at least
+one subsequent decision that affects acceptance, continuation, recovery, resource use, or security
+state.
+
+This document has four goals:
+\begin{enumerate}[label=(\arabic*)]
+  \item define the stable architectural ideas of Contextual Chain;
+  \item identify interfaces that future realizations may instantiate in different ways;
+  \item preserve the first recovery-oriented realization as a reproducible reference profile;
+  \item state evidence and security boundaries without turning current experimental details into permanent protocol requirements.
+\end{enumerate}
+
+This document is not a standards-track interoperability specification and is not a complete
+cryptographic security standard. It does not, by itself, claim Byzantine consensus, unforgeability,
+Sybil resistance, post-quantum security, a formal memory lower bound, or bounded-memory
+operation.
+
+\section{Normative Language and Layering}
+The words \textbf{MUST}, \textbf{SHOULD}, \textbf{MAY}, and \textbf{MUST NOT} apply only to the
+conceptual interfaces and to an implementation that explicitly claims conformance to a named
+reference profile. They do not require future Contextual Chain realizations to reuse the algorithms
+or parameter values of the current simulator.
+
+Version 2.0 distinguishes three layers:
+
+\paragraph{Conceptual Core.}
+Stable requirements that define the Contextual Chain design family.
+
+\paragraph{Reference Profiles.}
+Concrete, reproducible realizations of the core for a particular application domain. A profile
+\textbf{MAY} define additional mandatory behavior for that profile only.
+
+\paragraph{Experimental Extensions.}
+Non-normative mechanisms used to investigate future design directions. They do not become
+part of the conceptual core merely because they are evaluated.
+
+\section{Core Conceptual Model}
+\subsection{Context Sequence}
+Let $C_t$ denote the context available to a participant after processing event or interaction $t$.
+Contextual Chain treats operation as a sequence
+\[
+C_0 \rightarrow C_1 \rightarrow C_2 \rightarrow \cdots
+\]
+in which later decisions may depend on information carried forward from earlier accepted states.
+The representation of $C_t$ is intentionally unspecified. It \textbf{MAY} contain a compact digest,
+local graph state, recent observations, counters, scores, peer history, application state,
+cryptographic commitments, or other information relevant to continuation. Different realizations
+\textbf{MAY} retain different amounts of history.
+
+\subsection{Context Update Interface}
+A realization \textbf{MUST} define how context evolves. Abstractly,
+\[
+C_{t+1}=U(C_t,e_t),
+\]
+where $e_t$ is a newly observed event and $U$ is the realization-specific update rule. The update
+\textbf{MAY} be deterministic, probabilistic, distributed, or cryptographically authenticated,
+provided that the realization documents the semantics needed to reproduce or reason about its
+behavior.
+
+\subsection{Context-Informed Decision Interface}
+A realization \textbf{MUST} use context in at least one consequential decision. Abstractly,
+\[
+a_t=D(C_t,x_t),
+\]
+where $x_t$ is a candidate input, observation, message, branch, peer, or action opportunity and
+$a_t$ is an operational decision.
+
+Examples include, but are not limited to:
+\begin{itemize}
+  \item accepting, rejecting, ranking, or deferring a candidate continuation;
+  \item selecting a synchronization or recovery action;
+  \item allocating communication, computation, storage, or verification effort;
+  \item choosing peers or routes;
+  \item deciding which state to retain, summarize, or prune;
+  \item deriving or validating a context-bound authenticator.
+\end{itemize}
+No one item in this list is mandatory by itself.
+
+\subsection{Continuity and Contextual Narrowing}
+The general design intent is that a participant which has continuously followed a valid context
+can use that continuity to narrow its next decision space. A participant lacking sufficient context
+may face a wider set of plausible continuations. This principle is called \emph{contextual narrowing}
+in this specification.
+
+Contextual narrowing is a design objective, not a universal theorem. A particular realization
+\textbf{MUST} state what information narrows the decision space and under what assumptions that
+information remains useful.
+
+\section{Core Design Requirements}
+A realization claiming conformance to the Contextual Chain conceptual core \textbf{MUST} satisfy
+the following requirements.
+
+\paragraph{R1: Explicit evolving context.}
+The realization \textbf{MUST} define an operational context $C_t$ whose content can change over time.
+
+\paragraph{R2: Context dependence.}
+At least one later operational decision \textbf{MUST} depend on $C_t$ or on a value derived from it.
+A system that merely stores history but never uses it to influence later behavior is not a
+Contextual Chain realization.
+
+\paragraph{R3: Defined update semantics.}
+The realization \textbf{MUST} define the events that update context and the conditions under which
+an update is accepted, deferred, or discarded.
+
+\paragraph{R4: Uncertainty behavior.}
+The realization \textbf{MUST} define what happens when context is incomplete, inconsistent, stale,
+or ambiguous. This \textbf{MAY} involve conservative behavior, multiple hypotheses, recovery,
+explicit failure, or another documented policy.
+
+\paragraph{R5: Recovery or continuation interface.}
+The realization \textbf{MUST} define how operation resumes after a context gap, disagreement, or
+reconnection when such events are within its application model. The mechanism is profile specific
+and need not be gossip based.
+
+\paragraph{R6: Modular context use.}
+Context-dependent acceptance, synchronization, resource allocation, storage, and security
+mechanisms \textbf{SHOULD} be separable where practical so that their effects can be evaluated
+and replaced independently.
+
+\paragraph{R7: Evidence boundary.}
+A realization \textbf{MUST} distinguish architectural requirements from empirical findings and
+from security assumptions. Experimental success of one module \textbf{MUST NOT} be presented
+as proof that the module is universally required by Contextual Chain.
+
+\section{Replaceable Module Interfaces}
+The following modules are common but optional. A profile \textbf{MAY} instantiate any subset,
+combine modules, or add new ones.
+
+\subsection{Context Representation}
+A profile \textbf{MAY} represent context as explicit state, summaries, hashes, commitments, recent
+windows, learned embeddings, graph structure, or another representation. The conceptual core
+does not prescribe a fixed encoding.
+
+\subsection{Candidate Selection or Validation}
+A profile \textbf{MAY} use context to rank or validate branches, messages, transactions, state
+transitions, observations, or other candidates. The selection rule \textbf{MAY} be lexicographic,
+score-based, probabilistic, rule-based, or cryptographic.
+
+\subsection{Inconsistency or Confidence Estimation}
+A profile \textbf{MAY} derive a local or distributed signal indicating uncertainty, inconsistency,
+conflict, or confidence. The signal \textbf{MAY} use recent events, peer observations, statistical
+estimators, model-based detectors, or other mechanisms.
+
+\subsection{Synchronization and Recovery}
+A profile \textbf{MAY} use periodic gossip, request/response repair, erasure coding, peer-assisted
+reconciliation, state transfer, checkpoint retrieval, or another recovery mechanism. Context
+\textbf{MAY} affect the timing, intensity, target, or content of synchronization, but adaptive
+synchronization is not a mandatory feature of Contextual Chain.
+
+\subsection{Resource Allocation}
+A profile \textbf{MAY} use context to control communication, computation, storage, verification,
+memory, or energy expenditure. The relevant resource metric \textbf{MUST} be defined by that
+profile; simulator counters \textbf{MUST NOT} automatically be interpreted as physical bandwidth
+or energy.
+
+\subsection{Context Commitment and Authentication}
+A future profile \textbf{MAY} bind context to cryptographic commitments, signatures,
+challenge-response mechanisms, or other authenticators. Such a profile \textbf{MUST} define its
+own security model and proof obligations. Operational context dependence alone is not
+cryptographic authentication.
+
+\subsection{Retention and Pruning}
+A profile \textbf{MAY} retain full state, bounded windows, checkpoints, compressed summaries, or
+pruned state. Bounded memory is therefore a profile property, not a requirement of the
+conceptual core.
+
+\section{Reference Profile R1: Intermittent-Network Recovery}
+Reference Profile R1 preserves the first event-driven systems realization for reproducibility.
+R1 is non-normative for the broader Contextual Chain design family; its rules are mandatory only
+for an implementation claiming compatibility with R1.
+
+R1 models a small ledger-like distributed system subject to delay, loss, temporary partition,
+and rejoin. Each node maintains a local block graph, a current head, recent proposer and
+inconsistency state, and a synchronization state. The simulator processes proposal, delivery,
+and gossip-tick events.
+
+The current R1 implementation contains the following mechanisms:
+\begin{itemize}
+  \item deterministic local head selection over visible tips;
+  \item optional checkpoint metadata and proposer-based branch scoring;
+  \item recent-window inconsistency estimation with hysteretic local state;
+  \item periodic suffix-repair synchronization;
+  \item fixed or context-triggered synchronization schedules;
+  \item instrumentation for recovery, agreement, and synchronization-effort proxies.
+\end{itemize}
+
+The exact executable semantics, parameter defaults, evaluation variants, and accounting counters
+are defined by the public reference implementation associated with this profile. A future R2,
+R3, or domain-specific profile \textbf{MAY} use entirely different mechanisms while remaining
+within the Contextual Chain conceptual core.
+
+\subsection{Current R1 Interpretation}
+The principal height-epoch configuration used in the current R1 evaluation treats checkpoint
+level as an epoch label derived from height; in that configuration it should not be interpreted as
+an independently validated contextual signal. Likewise, the current fuller head-selection formula
+is a reference mechanism rather than a defining requirement of Contextual Chain.
+
+R1 also includes a context-derived inconsistency signal that can influence synchronization
+scheduling. The current native controller reads a simulator-wide aggregate and is therefore an
+experimental oracle-assisted controller rather than a deployable decentralized estimator. Future
+profiles \textbf{MAY} replace it with local, distributed, predictive, or application-specific
+controllers.
+
+\section{Evaluation Profiles and Mechanism Separation}
+Contextual Chain does not prescribe one universal benchmark. A scientific evaluation
+\textbf{SHOULD} separate mechanisms whenever feasible so that improvements attributed to
+``context'' are not confounded with changes in resource quantity, scheduling, network conditions,
+or unrelated control logic.
+
+For R1, the public evaluation includes ablations of head-selection behavior and synchronization
+policy, matched-seed schedule replay, and an equal-total-assigned-budget timing control. These are
+evaluation instruments, not protocol primitives.
+
+A future profile \textbf{SHOULD} document:
+\begin{itemize}
+  \item the context representation under test;
+  \item which decisions depend on context;
+  \item the relevant baseline that removes or neutralizes that dependence;
+  \item the resource quantity held constant, if any;
+  \item the source of randomness and matching procedure;
+  \item the limits of any proxy metric.
+\end{itemize}
+
+\section{Current Empirical Status of R1 (Informative)}
+Controlled experiments on the current R1 simulator support two qualitative conclusions. First,
+synchronization provisioning is a major determinant of post-rejoin recovery in the studied
+network model. Second, when total assigned synchronization opportunities are matched, a
+context-triggered temporal allocation can outperform an approximately uniform temporal
+allocation of the same assigned budget in the tested cases. Thus context can provide useful
+control information about when recovery effort is applied.
+
+The same controlled experiments do not establish a consistent independent advantage for the
+current fuller head-selection formula over a height-only baseline. This negative result is a
+property of the present R1 mechanism and configuration; it does not restrict future Contextual
+Chain profiles from using other context-aware selection, validation, or commitment mechanisms.
+
+Detailed numerical results, confidence intervals, seeds, schedules, code versions, and analysis
+scripts belong to the corresponding reproducibility release and research article rather than to
+the conceptual definition of Contextual Chain.
+
+\section{Resource-Asymmetry Research Direction}
+A broader motivation for Contextual Chain is the possibility of resource asymmetry created by
+contextual continuity. Let an honest participant track one accepted trajectory $C_t$, while a
+context-uncertain observer considers a set
+\[
+\mathcal{C}_t=\{C_t^{(1)},\ldots,C_t^{(m_t)}\}.
+\]
+If later verification or continuation depends on information carried by the accepted context,
+then uncertainty may require maintaining, deriving, testing, or querying more alternatives.
+
+This possibility can motivate designs in which the cost of uncertainty grows with the number,
+depth, or diversity of plausible contexts. However, Version 2.0 deliberately leaves the cost
+function, attacker model, challenge construction, and cryptographic primitive unspecified.
+Different future realizations may pursue memory cost, communication cost, computation cost,
+verification effort, search width, or another resource.
+
+No lower bound or security theorem follows from the conceptual model alone.
+
+\section{Security and Threat-Model Requirements}
+A profile that makes security claims \textbf{MUST} state its threat model explicitly. Depending on
+the application, this may include malicious proposers, Byzantine peers, equivocation, replay,
+context withholding, state desynchronization, Sybil behavior, key compromise, or quantum-capable
+adversaries.
+
+The conceptual core does not assume that context is secret. A profile \textbf{MAY} use public
+context, shared context, authenticated context, private context, or combinations thereof.
+
+A cryptographic Contextual Chain profile \textbf{MUST} separately specify:
+\begin{itemize}
+  \item the security game or formal property;
+  \item cryptographic assumptions and primitives;
+  \item how context is bound to messages or state;
+  \item adversarial capabilities and success criteria;
+  \item soundness, completeness, or other required proofs.
+\end{itemize}
+The current R1 simulator does not satisfy these obligations and therefore makes no cryptographic
+security claim.
+
+\section{Implementation and Measurement Guidance}
+Implementers \textbf{SHOULD} expose enough instrumentation to distinguish the following
+categories when relevant:
+\begin{itemize}
+  \item policy-assigned opportunities or budgets;
+  \item actions that survive filtering, loss, or eligibility checks;
+  \item actual payload units scheduled or transmitted;
+  \item physical bandwidth, latency, energy, or storage when measured in a real system.
+\end{itemize}
+These quantities \textbf{SHOULD NOT} be conflated.
+
+A profile \textbf{SHOULD} also document whether its local state is retained indefinitely,
+summarized, or pruned. If bounded memory or compact-state operation is claimed, the bound and
+pruning semantics \textbf{MUST} be explicit.
+
+\section{Versioning and Extensibility}
+Contextual Chain versions are expected to evolve by adding or replacing reference profiles and
+optional modules while preserving the conceptual core where possible.
+
+Future versions \textbf{MAY}, among other directions:
+\begin{itemize}
+  \item introduce decentralized or predictive context estimators;
+  \item replace gossip with other synchronization or reconciliation mechanisms;
+  \item use topology-aware or learned peer selection;
+  \item implement explicit pruning or compact-state retention;
+  \item define context-bound authentication or authorization;
+  \item instantiate the resource-asymmetry hypothesis with a formal adversary model;
+  \item introduce cryptographic or post-quantum constructions;
+  \item apply the framework outside ledger-like systems, including intermittent communications,
+  sensing, distributed control, and other sequential decision systems.
+\end{itemize}
+
+A new mechanism \textbf{SHOULD} be described as part of the general Contextual Chain core only
+if it is intended to be conceptually necessary across realizations. Otherwise it \textbf{SHOULD}
+be introduced as an optional module, a reference-profile feature, or an experimental extension.
+
+\section{Changes from Version 1.0}
+Version 2.0 makes the following conceptual changes without invalidating Version 1.0 as a
+historical implementation record:
+\begin{enumerate}
+  \item generalizes Contextual Chain from one operational ledger protocol to a design family based on evolving context and context-informed continuation;
+  \item defines a small stable conceptual core and separates it from replaceable modules;
+  \item moves checkpointing, fork choice, scoring, quarantine, and adaptive synchronization out of the universal definition and into the R1 reference profile;
+  \item treats current controlled experiments as evidence about R1 rather than as permanent protocol requirements;
+  \item preserves the resource-asymmetry idea as an open research direction without fixing one cryptographic or bookkeeping construction;
+  \item makes explicit that future profiles may differ substantially in context representation, synchronization, storage, security, and application domain.
+\end{enumerate}
+
+\appendix
+\section{Reference Profile R1 Reproducibility Note}
+The exact R1 implementation is maintained as executable code rather than duplicated as a large
+set of permanent normative equations in this general specification. The reproducibility release
+records the simulator version, experiment runners, seeds, schedule controls, statistical analysis,
+parameter provenance, and file checksums used for the associated controlled study.
+
+For orientation only, the principal controlled R1 study uses a 20-node event-driven simulation,
+a temporary partition followed by rejoin, noisy message delivery, and matched-seed comparisons
+of alternative local-selection and synchronization policies. These choices define that study; they
+do not constrain future Contextual Chain profiles.
+
+\section{Profile Authoring Checklist}
+A new Contextual Chain reference profile \textbf{SHOULD} document:
+\begin{enumerate}
+  \item the application and threat model;
+  \item the representation of context $C_t$;
+  \item the update rule $U$ and relevant event types;
+  \item the context-informed decision function or policy $D$;
+  \item uncertainty, inconsistency, and recovery behavior;
+  \item optional synchronization, resource-allocation, security, and pruning modules;
+  \item measurable outcomes and resource definitions;
+  \item reproducibility artifacts and version identifiers;
+  \item known limitations and claims that are explicitly out of scope.
+\end{enumerate}
+
+\section*{Acknowledgment of Scope}
+This document is a general technical design specification and public disclosure. Its purpose is
+to preserve the defining idea of Contextual Chain while allowing future realizations to evolve.
+The current recovery simulator is one reference profile, not the endpoint of the design. The
+specification therefore separates stable conceptual requirements from implementation-specific
+mechanisms, empirical results, and future security constructions.
+
+\end{document}
