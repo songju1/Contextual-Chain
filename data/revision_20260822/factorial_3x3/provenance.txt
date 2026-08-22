@@ -1,0 +1,36 @@
+Contextual Chain matched-schedule 3x3 factorial attribution experiment
+created_local=2026-08-22 09:55:36 +0000
+python=3.13.5 (main, Jul 15 2026, 20:25:40) [GCC 14.2.0]
+platform=Linux-6.18.35-x86_64-with-glibc2.41
+command=run_factorial_3x3.py
+n_output_rows=20000
+n_adaptive_schedule_source_runs=2000
+elapsed_s=568.722384
+n_seeds=1000
+cases=[('CaseA_50_50', 10), ('CaseB_80_20', 16)]
+factorial_cells=['Full__FixedLow', 'Full__FixedHigh', 'Full__Adaptive', 'HeightOnly__FixedLow', 'HeightOnly__FixedHigh', 'HeightOnly__Adaptive', 'BranchScoreOnly__FixedLow', 'BranchScoreOnly__FixedHigh', 'BranchScoreOnly__Adaptive']
+include_legacy_reference=True
+network_mode=noisy
+n_nodes=20
+partition=(1200.0, 2400.0)
+epoch_len_blocks=30
+cp_epoch_mode=height
+cp_tiebreak=none
+conservative_switching_factorial=False
+detector_factorial_use_quarantine=True
+adaptive_q_threshold=0.25
+gossip_pairs_low=1
+gossip_pairs_high=4
+net_delay_mean=0.8
+net_delay_jitter=0.2
+net_drop_p=0.02
+adaptive_schedule_source=Full + native Adaptive + conservative switching OFF
+adaptive_factorial_policy=exact replay of the source schedule in all 3 head rules
+
+sha256_sim_context_chain_v4.py=53e3e8e62cec9329b2c3a0640a21270d7aa415b390cf5b04ac0a81f15b73d67e
+sha256_sim_context_chain_v5_factorial.py=c465a758d7b06b4c4240a3473f75fe06843a43903369b4f0fb6044bdcd45255b
+sha256_run_factorial_3x3.py=ed22138737597b1e25f58b20ce6e680d4d13372df37b5316cc313f92cd4fd263
+
+NOTE: The Adaptive low/high schedule is exactly matched across head rules within
+each Case x seed. Equal seed labels are also used across all cells, but after head
+trajectories diverge, pseudo-random call streams need not remain lock-step.

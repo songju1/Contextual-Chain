@@ -1,0 +1,20 @@
+Step 10 canonical equal-total-budget experiment
+Seeds: 0-999 in both CaseA_50_50 and CaseB_80_20
+Head rules: Full, HeightOnly
+Timing policies: Adaptive replay, FixedMatched replay
+FixedMatched: exact same assigned total pair budget per Case×seed, spread as uniformly as possible over connected gossip ticks
+Execution: 50 direct chunks of 20 seeds each; simulation logic unchanged by chunking
+Canonical output rows: 8000
+Schedule records: 2000
+Independent merge/audit: PASS
+Cross-check against Step 7 Adaptive rows: 4000 rows, 0 mismatches
+v4/v5 common-field compatibility: 80/80 PASS
+sha256 sim_context_chain_v4.py = 53e3e8e62cec9329b2c3a0640a21270d7aa415b390cf5b04ac0a81f15b73d67e
+sha256 sim_context_chain_v5_factorial.py = 383d5212a2e5968cd2f05f21067fa31873e71ebeb0d9f31733172d07eeba0e16
+sha256 run_equal_budget_matched.py = 2374d1ff6c72e6299dc5d77b6ad99f1ddca4a55f71b46963c8490627d1d186c9
+sha256 merge_audit_equal_budget_step10.py = 9ed56d1c63e0b34ad40eb16b8fb7b7d058912ea40d36333a3795cb4f0f6ba4d0
+sha256 analyze_equal_budget_step10.py = f0d0e74082846651f9980570d301f3372f248596705b739b965e40c65175335f
+sha256 equal_budget_matched_main_step10/raw_equal_budget_matched.csv = 09b1492bfe3163589154dff0e5ae23d31e9f1e226d51465f834839e605d9003a
+sha256 equal_budget_matched_main_step10/matched_budget_schedules.csv = e64a93ea1fab267395b465371b02153119d854b86c093785b0768878bdf08915
+sha256 equal_budget_matched_main_step10/validation_equal_budget_matched.csv = b435c6e98e5690d62b201fa1b62acea68cbc7faf94c4152d501c6de8e41d5571
+sha256 factorial_3x3_main_step7/raw_factorial_3x3.csv = 548a74eb4df1d027ed2b2fdba218fcb00a185315e9ba56e901ca930ae216ea0b
