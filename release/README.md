@@ -8,7 +8,7 @@
 - factorial and equal-budget analysis scripts,
 - v4 compatibility, head-rule, synchronization-policy, and matched-schedule validation scripts.
 
-The bundle does not contain manuscript files, editorial correspondence, review reports, response documents, personal correspondence, credentials, or local execution logs.
+The bundle contains only code and reproducibility files. It excludes document drafts, correspondence, credentials, and local execution logs.
 
 Key SHA-256 code hashes used in the experiment provenance:
 
