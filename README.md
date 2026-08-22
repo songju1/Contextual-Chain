@@ -8,16 +8,22 @@ Contextual Chain is a **context-based protocol design principle**: synchronized 
 
 The current controlled experiments separate two questions: **how much synchronization is provisioned** and **when synchronization effort is applied**.
 
-The 3×3 matched-schedule factorial shows that synchronization provisioning is the dominant recovery factor under the studied synthetic partition/rejoin conditions. The specific contextual head-selection rule tested here does not show a consistent independent advantage over `HeightOnly`.
+The 3x3 matched-schedule factorial shows that synchronization provisioning is the dominant recovery factor under the studied synthetic partition/rejoin conditions. The specific contextual head-selection rule tested here does not show a consistent independent advantage over `HeightOnly`.
 
-A second, exact equal-total-assigned-budget control shows that synchronization **quantity alone does not explain the Adaptive result**. When the total assigned pair-selection budget is matched exactly for each Case×seed, context-triggered temporal allocation improves final agreement and shortens recovery relative to approximately uniform allocation in the tested setting.
+A second, exact equal-total-assigned-budget control shows that synchronization **quantity alone does not explain the Adaptive result**. When the total assigned pair-selection budget is matched exactly for each Case x seed, context-triggered temporal allocation improves final agreement and shortens recovery relative to approximately uniform allocation in the tested setting.
 
 For the Full rule, Adaptive versus FixedMatched gives:
 
-- Case A: final agreement **+6.2 percentage points**; mean recovery **−10.8 s**.
-- Case B: final agreement **+6.0 percentage points**; mean recovery **−14.0 s**.
+- Case A: final agreement **+6.2 percentage points**; mean recovery **-10.8 s**.
+- Case B: final agreement **+6.0 percentage points**; mean recovery **-14.0 s**.
 
 These are simulation-level results under an oracle-assisted trigger. They are **not** claims of measured packet-level bandwidth or energy savings. This release also does not claim cryptographic authentication, post-quantum security, Byzantine security, or Sybil resistance.
+
+## Specifications
+
+- `spec_contextual_chain_v1.pdf` is the historical Version 1.0 specification of the first operational realization (April 6, 2026).
+- `spec_contextual_chain_v2.tex` is the source of the current Version 2.0 general design specification. The compiled Version 2.0 PDF is intended for the versioned specification archive.
+- Version 2.0 separates the stable conceptual core from **Reference Profile R1**, so checkpointing, fork choice, scoring, synchronization control, pruning, peer selection, and cryptographic context binding remain replaceable rather than universal requirements.
 
 ## Repository layout
 
@@ -25,12 +31,12 @@ The earlier public simulator and experiment files remain in `src/`, `scripts/`, 
 
 Files added for the 2026-08-22 controlled-experiment release are:
 
-- `release/contextual_chain_revision_code_20260822.tar.gz` — exact simulator, runners, analyses, and validation scripts used for the new controlled experiments
-- `release/README.md` — contents and code-snapshot hashes for that bundle
-- `data/revision_20260822/` — derived statistics, audits, and provenance
-- `REPRODUCIBILITY.md` — design and reproduction notes
-- `requirements-revision-20260822.txt` — pinned analysis dependencies
-- `REVISION_CHECKSUMS.txt` — SHA-256 checksums of the newly released public files
+- `release/contextual_chain_revision_code_20260822.tar.gz` - exact simulator, runners, analyses, and validation scripts used for the new controlled experiments
+- `release/README.md` - contents and code-snapshot hashes for that bundle
+- `data/revision_20260822/` - derived statistics, audits, and provenance
+- `REPRODUCIBILITY.md` - design and reproduction notes
+- `requirements-revision-20260822.txt` - pinned analysis dependencies
+- `REVISION_CHECKSUMS.txt` - SHA-256 checksums of the newly released public files
 
 The full per-run outputs, matched schedules, and per-seed structural-validation tables are intentionally kept out of Git history. They are intended for the companion archival deposit, whose persistent identifier can be added here after that deposit is created.
 
